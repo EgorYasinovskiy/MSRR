@@ -49,7 +49,7 @@ namespace MSRR2
 				var lossValues = Enumerable.Range(1, SLOTS - 1)
 					.Select(x => unit.Loss + Normal(0, 1))
 					.ToArray();
-				result[unitId] = lossValues.Select(loss => network.GetCQI(loss, unit.HeatLoss) * (decimal)TRB).ToArray();
+				result[unitId] = lossValues.Select(loss => network.GetCQI(loss, unit.HeatLoss) * TRB).ToArray();
 			});
 			return result;
 		}
