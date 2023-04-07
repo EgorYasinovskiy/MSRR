@@ -80,27 +80,6 @@ namespace MSRR2.Graph
 					Color = _colors[res.Key]
 				});
 			}
-			//for (int i = 0; i < experiment.MeanBufferSizeByIntensityAndUserCount.Count; i++)
-			//{
-			//	expModel.Series.Add(new LineSeries()
-			//	{
-			//		ItemsSource = x.Value.Select((value, index) => new DataPoint(index, value)),
-			//		StrokeThickness = 4,
-			//		Title = $"{x.Key} абонентов в сети",
-			//		Color = _colors[x.Key]
-			//	});
-			//}
-			//experiment.MeanBufferSizeByIntensityAndUserCount.Select(x =>
-			//{
-			//	expModel.Series.Add(new LineSeries()
-			//	{
-			//		ItemsSource = x.Value.Select((value,index) => new DataPoint(index, value)),
-			//		StrokeThickness = 4,
-			//		Title = $"{x.Key} абонентов в сети",
-			//		Color = _colors[x.Key]
-			//	});
-			//	return 0;
-			//});
 			expModel.IsLegendVisible = true;
 			expModel.Legends.Add(new Legend() { LegendPosition = LegendPosition.RightTop });
 			_models.Add(expModel);

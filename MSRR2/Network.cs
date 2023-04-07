@@ -24,7 +24,7 @@ namespace MSRR2
 
 		public Network()
 		{
-			BaseStation = new BaseStation() { Band = 180000, Frequency = 1800000000, Power = 160 };
+			BaseStation = new BaseStation() { Band = 180, Frequency = 1800000, Power = 160 };
 			FreqLg = Math.Log10(BaseStation.Frequency);
 			aHRx = (1.1 * FreqLg - 0.7) * HRx - (1.56 * FreqLg - 0.8);
 			HRxLg = Math.Log10(HRx);
@@ -70,7 +70,8 @@ namespace MSRR2
 		}
 		public void ComputeOkumuraLoss(NetworkUnit unit)
 		{
-			unit.Loss = 46.3 + 33.9 * FreqLg - 13.82 * HBSLg - aHRx + (44.9 - 6.55 * HRxLg) * Math.Log10(unit.Position.Distance / 1000f) + LargeCityCoef;
+			var ldb = 46.3 + 33.9 * FreqLg - 13.82 * HBSLg - aHRx + (44.9 - 6.55 * HRxLg) * Math.Log10(unit.Position.Distance / 1000f) + LargeCityCoef;
+			unit.Loss = Math.Pow(10, ldb / 10);
 		}
 	}
 }
