@@ -24,7 +24,7 @@ namespace MSRR2
 
 		public Network()
 		{
-			BaseStation = new BaseStation() { Band = 180, Frequency = 1800000, Power = 160 };
+			BaseStation = new BaseStation() { Band = 180000, Frequency = 1800000000, Power = 160 };
 			FreqLg = Math.Log10(BaseStation.Frequency);
 			aHRx = (1.1 * FreqLg - 0.7) * HRx - (1.56 * FreqLg - 0.8);
 			HRxLg = Math.Log10(HRx);
