@@ -9,7 +9,7 @@ namespace MSRR2.Graph
 {
 	public partial class Form1 : Form
 	{
-		private int[] _abonentsCounts { get; set; } = { 2, 4, 8, 16, 32, 64};
+		private int[] _abonentsCounts { get; set; } = { 2, 4, 8, 16, 32, 64 };
 		private object _lock = new object();
 		private Dictionary<int, OxyColor> _colors = new Dictionary<int, OxyColor>(3)
 		{
@@ -33,7 +33,7 @@ namespace MSRR2.Graph
 		public void Experiment()
 		{
 			Experiment experiment = new Experiment();
-			foreach(var abCount in _abonentsCounts)
+			foreach (var abCount in _abonentsCounts)
 			{
 				Network network = new Network();
 				network.ResetUnits(abCount);
@@ -51,7 +51,7 @@ namespace MSRR2.Graph
 			model.Axes.Add(new AngleAxis { Minimum = 0, Maximum = 360, MajorStep = 60, MinorStep = 15, Title = "Угол" });
 			model.Axes.Add(new MagnitudeAxis { Minimum = 0, Maximum = 3, MajorStep = 1, MinorStep = 0.3, Title = "Расстояние (Км)" });
 			var series = new OxyPlot.Series.ScatterSeries();
-			var points = network.Units.Select(x => new ScatterPoint(x.Position.Distance/1000d, x.Position.Angle)).ToArray();
+			var points = network.Units.Select(x => new ScatterPoint(x.Position.Distance / 1000d, x.Position.Angle)).ToArray();
 			series.Points.AddRange(points);
 			Trace.WriteLine(string.Join(',', points.Select(x => x.X.ToString() + " " + x.Y.ToString()).ToArray()));
 			series.MarkerSize = 6;
@@ -70,14 +70,18 @@ namespace MSRR2.Graph
 			expModel.Axes.Add(new LinearAxis() { Title = "Объем буффера (Мб)" });
 			expModel.Axes.Add(new LinearAxis() { Title = "Интенсивность потока (Пак/с)", Position = AxisPosition.Bottom });
 			expModel.Title = $"Зависимость среднего суммарно объема данных находящихся в буфере у всех АБ от интенсивности входного потока";
-			foreach (var res in experiment.MeanBufferSizeByIntensityAndUserCount) 
+			foreach (var res in experiment.MeanBufferSizeByIntensityAndUserCount)
 			{
 				expModel.Series.Add(new LineSeries()
 				{
-					ItemsSource = res.Value.Select((value, index) => new DataPoint(index, value/1024)),
+					ItemsSource = res.Value.Select((value, index) => new DataPoint(index, value / 1024)),
 					StrokeThickness = 4,
+					BrokenLineStyle = LineStyle.Solid,
+					EdgeRenderingMode = EdgeRenderingMode.PreferSharpness,
+					CanTrackerInterpolatePoints = false,
 					Title = $"{res.Key} абонентов в сети",
-					Color = _colors[res.Key]
+					Color = _colors[res.Key],
+					InterpolationAlgorithm = null,
 				});
 			}
 			expModel.IsLegendVisible = true;

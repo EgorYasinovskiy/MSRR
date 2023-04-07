@@ -26,7 +26,7 @@ namespace MSRR2
 		{
 			BaseStation = new BaseStation() { Band = 180000, Frequency = 1800000000, Power = 160 };
 			FreqLg = Math.Log10(BaseStation.Frequency);
-			aHRx = (1.1 * FreqLg - 0.7) * HRx - (1.56 * FreqLg - 0.8);
+			aHRx = (1.1d * FreqLg - 0.7d) * HRx - (1.56d * FreqLg - 0.8d);
 			HRxLg = Math.Log10(HRx);
 			HBSLg = Math.Log10(HBS);
 			Bolcman = (1.38d * Math.Pow(10, -23));
@@ -52,26 +52,30 @@ namespace MSRR2
 			}
 		}
 
-		public double GetCQI(double loss, double heatLoss)
+		public decimal GetCQI(decimal loss, double heatLoss)
 		{
-			return BaseStation.Band * Math.Log2(1 + GetSNR(loss, heatLoss));
+			var valLg = (decimal)Math.Log2((double)(1 + GetSNR(loss, heatLoss)));
+			return BaseStation.Band * valLg;
 		}
-		private double GetSNR(double loss, double heatLoss)
+		private decimal GetSNR(decimal loss, double heatLoss)
 		{
-			return GetPRX(loss) / GetPN(heatLoss);
+			var val = GetPRX(loss) / (decimal)GetPN(heatLoss);
+			return val;
 		}
 		private double GetPN(double heatLoss)
 		{
-			return BaseStation.Band * Temperature * Bolcman * heatLoss;
+			var val = BaseStation.Band * Temperature * Bolcman * heatLoss;
+			return val;
 		}
-		private double GetPRX(double loss)
+		private decimal GetPRX(decimal loss)
 		{
-			return BaseStation.Power / loss;
+			var val = ((decimal)BaseStation.Power) / loss;
+			return val;
 		}
 		public void ComputeOkumuraLoss(NetworkUnit unit)
 		{
-			var ldb = 46.3 + 33.9 * FreqLg - 13.82 * HBSLg - aHRx + (44.9 - 6.55 * HRxLg) * Math.Log10(unit.Position.Distance / 1000f) + LargeCityCoef;
-			unit.Loss = Math.Pow(10, ldb / 10);
+			var ldb = 46.3d + 33.9d * FreqLg - 13.82d * HBSLg - aHRx + (44.9d - 6.55d * HRxLg) * Math.Log10(unit.Position.Distance / 1000d) + LargeCityCoef;
+			unit.Loss = ldb;
 		}
 	}
 }

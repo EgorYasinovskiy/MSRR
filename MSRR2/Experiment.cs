@@ -29,8 +29,8 @@ namespace MSRR2
 				{
 					var unitIndex = (int)((x - 1) % abCount);
 					UploadFromBs(cqi[unitIndex][x - 1], unitIndex, buffers);
-					DownloadToBS(propability, buffers);
 					bufferSum[x - 1] = buffers.Sum(x => Convert.ToInt32((x / 8 / 1024)));
+					DownloadToBS(propability, buffers);
 				});
 				mean[intens - 1] = bufferSum.Average();
 			}
@@ -40,16 +40,16 @@ namespace MSRR2
 			}
 		}
 
-		private double[][] PrecomputeCQI(Network network)
+		private decimal[][] PrecomputeCQI(Network network)
 		{
-			var result = new double[network.Units.Count][];
+			var result = new decimal[network.Units.Count][];
 			Parallel.For(0, network.Units.Count, new ParallelOptions { MaxDegreeOfParallelism = 12 }, unitId =>
 			{
 				var unit = network.Units[unitId];
 				var lossValues = Enumerable.Range(1, SLOTS - 1)
-					.Select(x => unit.Loss + Normal(0, 1))
+					.Select(x => (decimal)Math.Pow(10,(unit.Loss + Normal(0, 1))/10))
 					.ToArray();
-				result[unitId] = lossValues.Select(loss => network.GetCQI(loss, unit.HeatLoss) * TRB).ToArray();
+				result[unitId] = lossValues.Select(loss => network.GetCQI(loss, unit.HeatLoss) * (decimal)TRB).ToArray();
 			});
 			return result;
 		}
@@ -68,7 +68,7 @@ namespace MSRR2
 			}
 		}
 
-		public void UploadFromBs(double cqi, int unitIndex, long[] buffers)
+		public void UploadFromBs(decimal cqi, int unitIndex, long[] buffers)
 		{
 			var packetCount = (int)(cqi / 8 / 1024);
 			var dataSize = packetCount * 8 * 1024;
@@ -80,7 +80,7 @@ namespace MSRR2
 			// формула отсюда
 			// https://math.stackexchange.com/questions/485448/prove-the-way-to-generate-geometrically-distributed-random-numbers
 
-			double u = _rand.NextDouble();
+			double u = Random.Shared.NextDouble();
 			return (int)Math.Ceiling(Math.Log(1 - u) / Math.Log(1 - p)) - 1;
 		}
 
@@ -88,10 +88,10 @@ namespace MSRR2
 		{
 			// первый вариант, долгий но зато покрывает больше значений
 			// https://ru.wikipedia.org/wiki/Преобразование_Бокса_—_Мюллера
-			var r = _rand.NextDouble();
-			var fi = _rand.NextDouble();
+			var r = Random.Shared.NextDouble();
+			var fi = Random.Shared.NextDouble();
 			var lnr = Math.Sqrt(-2d * Math.Log(r));
-			var fiAngle = 2 * Math.PI * fi;
+			var fiAngle = 2d * Math.PI * fi;
 			var answers = new[] { lnr * Math.Cos(fiAngle), lnr * Math.Sin(fiAngle) };
 			return mean + deviation * answers[_rand.Next(2)];
 		}
