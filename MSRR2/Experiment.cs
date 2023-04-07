@@ -1,4 +1,6 @@
-﻿namespace MSRR2
+﻿using System.Security.Cryptography.X509Certificates;
+
+namespace MSRR2
 {
 	public class Experiment
 	{
@@ -30,7 +32,7 @@
 					DownloadToBS(propability, buffers);
 					bufferSum[x - 1] = buffers.Sum(x => Convert.ToInt32((x / 8 / 1024)));
 				});
-				mean[intens-1] = bufferSum.Average();
+				mean[intens - 1] = bufferSum.Average();
 			}
 			lock (_lockResult)
 			{
@@ -79,15 +81,19 @@
 			// https://math.stackexchange.com/questions/485448/prove-the-way-to-generate-geometrically-distributed-random-numbers
 
 			double u = _rand.NextDouble();
-			return (int)Math.Ceiling(Math.Log(1 - u) / Math.Log(1 - p))-1;
+			return (int)Math.Ceiling(Math.Log(1 - u) / Math.Log(1 - p)) - 1;
 		}
 
 		public double Normal(double mean, double deviation)
 		{
-			double randNum = _rand.NextDouble();
-			double normalRand = Math.Sqrt(-2 * Math.Log(randNum)) * Math.Cos(2 * Math.PI * _rand.NextDouble());
-			normalRand = normalRand * deviation + mean;
-			return normalRand;
+			// первый вариант, долгий но зато покрывает больше значений
+			// https://ru.wikipedia.org/wiki/Преобразование_Бокса_—_Мюллера
+			var r = _rand.NextDouble();
+			var fi = _rand.NextDouble();
+			var lnr = Math.Sqrt(-2d * Math.Log(r));
+			var fiAngle = 2 * Math.PI * fi;
+			var answers = new[] { lnr * Math.Cos(fiAngle), lnr * Math.Sin(fiAngle) };
+			return mean + deviation * answers[_rand.Next(2)];
 		}
 	}
 }
