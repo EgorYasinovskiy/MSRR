@@ -40,14 +40,14 @@ namespace MSRR2
 			}
 		}
 
-		private decimal[][] PrecomputeCQI(Network network)
+		private double[][] PrecomputeCQI(Network network)
 		{
-			var result = new decimal[network.Units.Count][];
+			var result = new double[network.Units.Count][];
 			Parallel.For(0, network.Units.Count, new ParallelOptions { MaxDegreeOfParallelism = 12 }, unitId =>
 			{
 				var unit = network.Units[unitId];
 				var lossValues = Enumerable.Range(1, SLOTS - 1)
-					.Select(x => (decimal)Math.Pow(10,(unit.Loss + Normal(0, 1))/10))
+					.Select(x => unit.Loss + Normal(0, 1))
 					.ToArray();
 				result[unitId] = lossValues.Select(loss => network.GetCQI(loss, unit.HeatLoss) * (decimal)TRB).ToArray();
 			});
@@ -68,7 +68,7 @@ namespace MSRR2
 			}
 		}
 
-		public void UploadFromBs(decimal cqi, int unitIndex, long[] buffers)
+		public void UploadFromBs(double cqi, int unitIndex, long[] buffers)
 		{
 			var packetCount = (int)(cqi / 8 / 1024);
 			var dataSize = packetCount * 8 * 1024;

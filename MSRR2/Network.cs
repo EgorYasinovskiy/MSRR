@@ -52,30 +52,26 @@ namespace MSRR2
 			}
 		}
 
-		public decimal GetCQI(decimal loss, double heatLoss)
+		public double GetCQI(double loss, double heatLoss)
 		{
-			var valLg = (decimal)Math.Log2((double)(1 + GetSNR(loss, heatLoss)));
-			return BaseStation.Band * valLg;
+			return BaseStation.Band * Math.Log2(1 + GetSNR(loss, heatLoss));
 		}
-		private decimal GetSNR(decimal loss, double heatLoss)
+		private double GetSNR(double loss, double heatLoss)
 		{
-			var val = GetPRX(loss) / (decimal)GetPN(heatLoss);
-			return val;
+			return GetPRX(loss) / GetPN(heatLoss);
 		}
 		private double GetPN(double heatLoss)
 		{
-			var val = BaseStation.Band * Temperature * Bolcman * heatLoss;
-			return val;
+			return BaseStation.Band * Temperature * Bolcman * heatLoss;
 		}
-		private decimal GetPRX(decimal loss)
+		private double GetPRX(double loss)
 		{
-			var val = ((decimal)BaseStation.Power) / loss;
-			return val;
+			return BaseStation.Power / loss;
 		}
 		public void ComputeOkumuraLoss(NetworkUnit unit)
 		{
-			var ldb = 46.3d + 33.9d * FreqLg - 13.82d * HBSLg - aHRx + (44.9d - 6.55d * HRxLg) * Math.Log10(unit.Position.Distance / 1000d) + LargeCityCoef;
-			unit.Loss = ldb;
+			var ldb = 46.3 + 33.9 * FreqLg - 13.82 * HBSLg - aHRx + (44.9 - 6.55 * HRxLg) * Math.Log10(unit.Position.Distance / 1000f) + LargeCityCoef;
+			unit.Loss = Math.Pow(10, ldb / 10);
 		}
 	}
 }
