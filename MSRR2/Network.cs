@@ -54,24 +54,89 @@ namespace MSRR2
 
 		public double GetCQI(double loss, double heatLoss)
 		{
-			return BaseStation.Band * Math.Log2(1 + GetSNR(loss, heatLoss));
+			var snr = GetSNR(loss, heatLoss);
+			//var log2 = Math.Log2(1 + snr); // Это говно возвращает 0 для маленьких значений. Нужно переписать используя меньший эпсилон (-производительнось)
+			var log = LogN((decimal)snr, 2m);
+			var val = BaseStation.Band * log;
+			return (double)val;
+			//return BaseStation.Band * Math.Log2(1 + GetSNR(loss, heatLoss));
 		}
 		private double GetSNR(double loss, double heatLoss)
 		{
+			var prx = GetPRX(loss);
+			var pn = GetPN(heatLoss);
+			var val = prx / pn;
+			return val;
 			return GetPRX(loss) / GetPN(heatLoss);
 		}
 		private double GetPN(double heatLoss)
 		{
+			var val = BaseStation.Band * Temperature * Bolcman * heatLoss;
+			return val;
 			return BaseStation.Band * Temperature * Bolcman * heatLoss;
 		}
 		private double GetPRX(double loss)
 		{
+			var val = BaseStation.Power / loss;
+			return val;
 			return BaseStation.Power / loss;
 		}
 		public void ComputeOkumuraLoss(NetworkUnit unit)
 		{
 			var ldb = 46.3 + 33.9 * FreqLg - 13.82 * HBSLg - aHRx + (44.9 - 6.55 * HRxLg) * Math.Log10(unit.Position.Distance / 1000f) + LargeCityCoef;
-			unit.Loss = Math.Pow(10, ldb / 10);
+			unit.Loss = ldb;
+		}
+		
+
+		// Удачная ссылочка, в нашем случае как раз нужно 1+SNR, что можно разложить в такой логарифмический ряд
+		// https://www.math10.com/ru/algebra/logarifmi-log-lg-ln/logarifmi.html
+		public static decimal Log(decimal x, decimal e)
+		{
+			decimal result = 0;
+			decimal prevRes = decimal.MaxValue;
+			decimal pow = 1;
+			while(Math.Abs(prevRes-result) > e)
+			{
+				prevRes = result;
+				decimal poweredX = 1;
+				for (int i = 0; i < pow; i++)
+				{
+					poweredX*= x;
+				}
+
+				decimal tmp = pow % 2 == 0 ? -poweredX: poweredX;
+				result += tmp / pow;
+			}
+
+			return result;
+		}
+
+		public static decimal LogN(decimal x, decimal @base, decimal e = 1e-6m)
+		{
+
+			//log_a(b) = log_c(b) / log_c(a); В нашем случае с = e(2.71)
+			decimal ln_x = Log(x, e);
+			// Оптимизация популярных основний
+			decimal ln_a = 0m;
+			switch (@base)
+			{
+				case 2m:
+					ln_a = 0.69314718056m;
+					break;
+				case 10m:
+					ln_a = 2.30258509299m;
+					break;
+				case (decimal)Math.E:
+					ln_a = 1;
+					break;
+				default:
+					ln_a = Log(@base, e);
+					break;
+
+			}
+			decimal result = ln_x / ln_a;
+
+			return result;
 		}
 	}
 }
